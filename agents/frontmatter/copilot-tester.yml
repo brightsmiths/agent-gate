@@ -1,0 +1,10 @@
+---
+description: Generate adversarial, mutation-resistant test suites from interface specifications and behavioral assertions. Enforced path restrictions prevent reading or modifying implementation code.
+name: Tester
+tools: ['changes', 'search/codebase', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'fetch', 'problems', 'runCommands', 'runTasks', 'runTests', 'search', 'search/searchResults', 'runCommands/terminalLastCommand', 'runCommands/terminalSelection', 'testFailure', 'think', 'usages']
+model: Claude Sonnet 4.6 (copilot)
+# No handoff to coder — start a NEW chat session for the coder agent.
+# Context isolation: the coder must discover test expectations by reading
+# tests/ from disk, not from the tester's conversation history.
+# This simulates the agentgate Docker model where agents cannot share context.
+---

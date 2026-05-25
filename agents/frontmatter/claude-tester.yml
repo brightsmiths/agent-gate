@@ -1,0 +1,6 @@
+---
+name: tester
+description: "Adversarial tester: writes failing tests from specs. PROACTIVELY use for TDD test writing. Cannot modify implementation code in src/."
+tools: Read, Write, Edit, Bash, Grep, Glob
+model: sonnet
+---

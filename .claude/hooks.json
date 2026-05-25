@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "description": "Enforce agentgate path restrictions on file write operations",
+        "matcher": {
+          "tool_name": ["Write", "Edit"]
+        },
+        "command": "bash scripts/agentgate-check-path.sh \"$TOOL_INPUT_FILE_PATH\"",
+        "on_success": "allow",
+        "on_failure": "deny"
+      }
+    ],
+    "PreToolUse:Bash": [
+      {
+        "description": "Warn on git commit attempts - must use commit quality gate",
+        "matcher": {
+          "tool_input_contains": ["git commit", "git push"]
+        },
+        "command": "echo 'DENY: Use the commit quality gate (cargo test && git commit) instead of direct git operations. All commits must pass the .agentgate.toml check pipeline.' >&2 && exit 1",
+        "on_failure": "deny"
+      }
+    ]
+  }
+}
