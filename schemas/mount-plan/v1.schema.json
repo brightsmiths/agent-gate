@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:brightsmiths:agent-gate:mount-plan:1",
+  "title": "agent-gate mount plan v1",
+  "description": "Enumerated, provider-neutral access plan for one agent role over one checkout. Produced by agent-gate, applied by sandbox-runner. Owner: agent-gate (proposed for adoption by the harness). See docs/spec/interfaces/mount-plan.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "role", "zone", "policy", "rules", "entries"],
+  "properties": {
+    "schema": { "const": "urn:brightsmiths:agent-gate:mount-plan:1" },
+    "role": { "$ref": "#/$defs/roleName" },
+    "zone": { "enum": ["A", "B", "C", "D", "E"] },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "digest"],
+      "properties": {
+        "source": { "enum": ["pack", "repository"] },
+        "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      }
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["write", "write_except", "read_only", "absent", "narrowing"],
+      "properties": {
+        "write": { "$ref": "#/$defs/globList" },
+        "write_except": { "$ref": "#/$defs/globList" },
+        "read_only": { "$ref": "#/$defs/globList" },
+        "absent": { "$ref": "#/$defs/globList" },
+        "narrowing": { "$ref": "#/$defs/globList" }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "roleName": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "not": { "const": "human" }
+    },
+    "glob": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "globList": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/glob" }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "kind", "access"],
+      "properties": {
+        "path": {
+          "description": "Repository-relative path using '/' separators. The empty string is the checkout root. No leading '/', no '.' or '..' segments.",
+          "type": "string",
+          "maxLength": 4096
+        },
+        "kind": { "enum": ["file", "dir", "symlink"] },
+        "access": { "enum": ["rw", "ro", "absent"] },
+        "owner": {
+          "description": "L2: owner class; sandbox-runner maps it to a UID.",
+          "enum": ["agent", "locked"]
+        },
+        "mode": {
+          "description": "L2: octal file mode to apply, e.g. 0444 or 1775.",
+          "type": "string",
+          "pattern": "^[0-7]{4}$"
+        },
+        "sticky": {
+          "description": "L2: sticky bit on directories (also encoded in mode).",
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

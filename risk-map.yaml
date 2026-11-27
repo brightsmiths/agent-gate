@@ -1,0 +1,5 @@
+schema: urn:brightsmiths:harness:risk-map:1
+# agent-gate is a security-boundary repository. It is T2 or higher whoever builds it.
+default: t2
+rules:
+  - { paths: ["**"], tier: t2 }
