@@ -1,0 +1,71 @@
+# Technology decisions for agent-gate.
+# Status values: decided | proposed. See docs/adr/ for rationale.
+
+language:
+  name: rust
+  status: decided
+  adr: docs/adr/ADR-0001-rust-library-and-stateless-cli.md
+  toolchain: stable, pinned via rust-toolchain.toml (added when implementation starts)
+
+shape:
+  form: library crate plus a stateless CLI binary; no daemon, no network, no persistent state
+  status: decided
+  adr: docs/adr/ADR-0001-rust-library-and-stateless-cli.md
+
+architecture:
+  style: clean architecture (business logic / ports / adapters) as a cargo workspace
+  dependency_rule: the business-logic crate must not depend on filesystem, git, YAML/JSON, CLI or process crates
+  enforcement: workspace crate boundaries + cargo-deny bans
+  status: decided
+
+error_handling:
+  expected_errors: Result<T, E> with typed error enums
+  panics: programmer errors only; never on untrusted input
+  failure_mode: fail closed (any error yields an `error` result and a non-zero exit)
+  status: decided
+
+git_access:
+  approach: read objects through a library behind a port; never spawn `git`; never honour repository config, attributes, filters or hooks
+  candidate_library: gix (gitoxide), to be confirmed by interface design
+  status: decided (approach); proposed (library)
+  adr: docs/adr/ADR-0006-trusted-inputs-and-safe-git-reading.md
+
+interfaces:
+  roles_input:
+    schema: urn:brightsmiths:harness:roles:1
+    owner: brightsmiths/harness
+    adr: docs/adr/ADR-0002-roles-from-the-harness.md
+  identity_map:
+    schema: urn:brightsmiths:agent-gate:identities:1
+    file: schemas/identities/v1.schema.json
+    owner: agent-gate (proposed; may move to the harness)
+    adr: docs/adr/ADR-0004-scope-check-semantics.md
+  mount_plan:
+    schema: urn:brightsmiths:agent-gate:mount-plan:1
+    file: schemas/mount-plan/v1.schema.json
+    owner: agent-gate (proposed; may move to the harness)
+    adr: docs/adr/ADR-0003-mount-plan-format.md
+  scope_check_result:
+    format: gate-result/v1 (owned by gate-warden)
+    adr: docs/adr/ADR-0005-scope-check-emits-gate-result-v1.md
+  schema_dialect: JSON Schema draft 2020-12
+  glob_semantics: gitignore-style `**`, case-sensitive, repository-relative
+
+testing:
+  runner: cargo-nextest
+  property: proptest
+  mutation: cargo-mutants
+  fuzz: cargo-fuzz on policy, identity-map and glob parsing
+  targets: 95% line coverage and 85% mutation score on the business-logic crate (proposed)
+
+constraints:
+  - no LLM anywhere in agent-gate
+  - no network access
+  - no unsafe code
+  - no discipline-specific logic
+  - no quality or test checks
+
+to_be_decided_by_interface_design:
+  - glob matching library (must support gitignore-style `**` with literal separators)
+  - YAML parser (must reject duplicate keys)
+  - CLI argument parser

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:brightsmiths:agent-gate:identities:1",
+  "title": "agent-gate identity map v1",
+  "description": "Maps commit identities (emails) to roles for the scope check. Human-owned; read from .factory/identities.yaml on the default branch. Owner: agent-gate (proposed for adoption by the harness). See docs/spec/interfaces/identity-map.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "identities"],
+  "properties": {
+    "schema": { "const": "urn:brightsmiths:agent-gate:identities:1" },
+    "identities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["email", "role"],
+        "properties": {
+          "email": { "$ref": "#/$defs/email" },
+          "role": {
+            "description": "A role defined in the roles policy, or the reserved role 'human'.",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          }
+        }
+      }
+    },
+    "pass_through_committers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/email" },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "email": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 320,
+      "pattern": "^[^\\s@]+@[^\\s@]+$"
+    }
+  }
+}

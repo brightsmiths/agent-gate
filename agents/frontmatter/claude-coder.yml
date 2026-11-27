@@ -1,6 +1,0 @@
----
-name: coder
-description: "TDD executor: implements code to make failing tests pass. PROACTIVELY use for implementation tasks. Cannot modify test code in tests/."
-tools: Read, Write, Edit, Bash, Grep, Glob
-model: sonnet
----
